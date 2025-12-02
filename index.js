@@ -3,13 +3,22 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRouters from "./src/routes/authRoutes.js";
 
-
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // local frontend
+      "https://village-ai-fe.vercel.app", // production frontend
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
 app.use(express.json()); // For JSON body
-app.use(express.urlencoded({ extended: false })); 
+app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/auth", authRouters);
 
@@ -43,9 +52,7 @@ app.post("/api/chat", async (req, res) => {
           contents: [
             {
               role: "user",
-              parts: [
-                { text: `${farmingContext}\n\nUser: ${message}` }, 
-              ],
+              parts: [{ text: `${farmingContext}\n\nUser: ${message}` }],
             },
           ],
         }),
@@ -69,8 +76,6 @@ app.post("/api/chat", async (req, res) => {
     res.status(500).json({ text: "⚠️ Something went wrong." });
   }
 });
-
-
 
 // ------------------ SERVER START ------------------
 const PORT = process.env.PORT || 5000;
